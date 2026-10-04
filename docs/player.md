@@ -30,6 +30,10 @@ second (`[data-video-share]`), has a cinema mode (`[data-video-cinema]`,
 `html.video-cinema`), speed and quality menus, a storyboard on the time bar,
 the keyboard of media-chrome.
 
+A film's page (`@Video/client/watch.html.twig`) leaves two blocks to a
+site: `video_channel` (the channel and its subscribe button - emptied on a
+single-show site) and `video_extra` (under the description).
+
 ## Engines
 
 The player's commands never touch a `<video>`: they talk to an engine.

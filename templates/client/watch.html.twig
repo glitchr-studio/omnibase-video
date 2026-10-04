@@ -26,6 +26,7 @@
         <h1 class="video-watch-title">{{ video.title }}</h1>
 
         <div class="video-watch-bar">
+            {% block video_channel %}
             {% if channel %}
             <div class="video-channel-chip">
                 <a class="video-avatar" href="{{ path('video_channel', {slug: channel.slug}) }}" aria-hidden="true" tabindex="-1">{% if channel.avatar %}<img src="{{ channel.avatar }}" alt="">{% else %}<span>{{ channel.initials }}</span>{% endif %}</a>
@@ -42,6 +43,7 @@
                 {% endif %}
             </div>
             {% endif %}
+            {% endblock %}
 
             <div class="video-actions">
                 <div class="video-rating" role="group" aria-label="{{ 'watch.rating'|trans }}">
