@@ -1,0 +1,11 @@
+{% trans_default_domain 'video' %}
+{% set route = app.request.attributes.get('_route') %}
+<nav class="video-studio-nav" aria-label="{{ 'studio.title'|trans }}">
+    <a href="{{ path('video_studio') }}" {{ route in ['video_studio', 'video_studio_edit', 'video_studio_stats', 'video_studio_comments', 'video_studio_replace'] ? 'aria-current="page"' }}><i class="fa-solid fa-film" aria-hidden="true"></i> {{ 'studio.nav.videos'|trans }}</a>
+    {% if upload ?? true %}<a href="{{ path('video_studio_upload') }}" {{ route == 'video_studio_upload' ? 'aria-current="page"' }}><i class="fa-solid fa-upload" aria-hidden="true"></i> {{ 'studio.nav.upload'|trans }}</a>{% endif %}
+    <a href="{{ path('video_studio_link') }}" {{ route == 'video_studio_link' ? 'aria-current="page"' }}><i class="fa-solid fa-link" aria-hidden="true"></i> {{ 'studio.nav.link'|trans }}</a>
+    <a href="{{ path('video_studio_channel') }}" {{ route == 'video_studio_channel' ? 'aria-current="page"' }}><i class="fa-solid fa-tv" aria-hidden="true"></i> {{ 'studio.nav.channel'|trans }}</a>
+    <a href="{{ path('video_studio_subscribers') }}" {{ route == 'video_studio_subscribers' ? 'aria-current="page"' }}><i class="fa-solid fa-users" aria-hidden="true"></i> {{ 'studio.nav.subscribers'|trans }}</a>
+    <a href="{{ path('video_playlists') }}"><i class="fa-solid fa-list" aria-hidden="true"></i> {{ 'studio.nav.playlists'|trans }}</a>
+    <a href="{{ path('video_studio_trash') }}" {{ route == 'video_studio_trash' ? 'aria-current="page"' }}><i class="fa-solid fa-trash-can" aria-hidden="true"></i> {{ 'studio.nav.trash'|trans }}</a>
+</nav>

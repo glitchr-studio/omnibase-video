@@ -1,0 +1,32 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'library.history'|trans }}{% endblock %}
+{% block content %}
+<div class="video-library">
+    <header class="video-page-head">
+        <h1>{{ 'library.history'|trans }}</h1>
+        {% if history|length %}
+        <form method="post" action="{{ path('video_history_clear') }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+            <button type="submit" class="video-button">{{ 'library.history_clear'|trans }}</button>
+        </form>
+        {% endif %}
+    </header>
+    {% if history|length %}
+    <div class="video-grid">
+        {% for row in history %}
+        <div class="video-history-item">
+            {% include '@Video/client/_card.html.twig' with {video: row.video, from: 'history', progress: row.position} only %}
+            <form method="post" action="{{ path('video_history_clear') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                <input type="hidden" name="video" value="{{ row.video.slug }}">
+                <button type="submit" class="video-link-button">{{ 'library.history_remove'|trans }}</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="video-empty">{{ 'library.history_empty'|trans }}</p>
+    {% endif %}
+</div>
+{% endblock %}

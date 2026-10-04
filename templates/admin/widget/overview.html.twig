@@ -1,0 +1,31 @@
+{# The platform's tile (Base\Video\Admin\Widget\VideoOverviewWidgetType). #}
+{% trans_default_domain 'video' %}
+<div class="analytics-card card video-widget">
+    <div class="analytics-card-header">
+        <h2 class="analytics-card-title">{{ widget.label|trans({}, 'admin') }}</h2>
+    </div>
+    <div class="video-widget-body">
+        <a class="video-widget-figure{{ pending ? ' is-warning' }}" href="{{ admin_url('Base\\Video\\Controller\\Admin\\Crud\\VideoCommentCrudController', 'index') }}"><b>{{ pending }}</b><span>{{ 'admin.widget.pending'|trans({count: pending}) }}</span></a>
+        <a class="video-widget-figure{{ reports ? ' is-warning' }}" href="{{ admin_url('Base\\Admin\\Controller\\Crud\\ComplaintCrudController', 'index') }}"><b>{{ reports }}</b><span>{{ 'admin.widget.reports'|trans({count: reports}) }}</span></a>
+        <a class="video-widget-figure" href="{{ admin_url('Base\\Video\\Controller\\Admin\\Crud\\VideoCrudController', 'index') }}"><b>{{ running }}</b><span>{{ 'admin.widget.running'|trans({count: running}) }}</span></a>
+        <a class="video-widget-figure{{ failed ? ' is-warning' }}" href="{{ admin_url('Base\\Video\\Controller\\Admin\\Crud\\VideoCrudController', 'index') }}"><b>{{ failed }}</b><span>{{ 'admin.widget.failed'|trans({count: failed}) }}</span></a>
+        <p class="video-widget-views"><b>{{ views|video_count }}</b> {{ 'admin.widget.views'|trans({count: views}) }}</p>
+        {% if recent %}
+        <ul class="video-widget-recent">
+            {% for video in recent %}
+            <li><a href="{{ admin_url('Base\\Video\\Controller\\Admin\\Crud\\VideoCrudController', 'detail', video.id) }}">{{ video.title }}</a> <small>{{ ('processing.' ~ video.processing)|trans }}</small></li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+<style>
+    .video-widget-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; padding: 0 1rem 1rem; }
+    .video-widget-figure { display: grid; gap: .1rem; padding: .6rem .8rem; border-radius: .6rem; background: rgba(127,127,127,.08); color: inherit; text-decoration: none; }
+    .video-widget-figure b { font-size: 1.4rem; line-height: 1; }
+    .video-widget-figure span { font-size: .8rem; opacity: .75; }
+    .video-widget-figure.is-warning { background: rgba(252,104,117,.16); }
+    .video-widget-views { grid-column: 1 / -1; margin: .2rem 0 0; font-size: .9rem; }
+    .video-widget-recent { grid-column: 1 / -1; margin: 0; padding-left: 1.1rem; font-size: .85rem; }
+    .video-widget-recent small { opacity: .65; }
+</style>

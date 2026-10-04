@@ -1,0 +1,19 @@
+{#
+ # A film in a list: its poster and length, its title, its channel, its
+ # views and age. video; from (where the click counts from: home, search...);
+ # list (a playlist's slug, to keep playing it); compact (a narrow row).
+ #}
+{% trans_default_domain 'video' %}
+{% set link = path('video_watch', {slug: video.slug}|merge(list ?? false ? {list: list} : {})|merge(from ?? false ? {from: from} : {})) %}
+<article class="video-card{{ compact ?? false ? ' video-card--compact' }}">
+    <a class="video-card-poster" href="{{ link }}" tabindex="-1" aria-hidden="true">
+        {% if video.poster %}<img src="{{ video.poster }}" alt="" loading="lazy" decoding="async">{% else %}<span class="video-card-blank">{% if video.embedded %}<span><i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i> {{ video.playableSource.platform|capitalize }}</span>{% endif %}</span>{% endif %}
+        {% if video.duration %}<span class="video-card-time">{{ video.duration|video_time }}</span>{% endif %}
+        {% if progress ?? false and video.duration %}<span class="video-card-progress" style="--progress: {{ (progress / video.duration * 100)|round(1) }}%"></span>{% endif %}
+    </a>
+    <div class="video-card-text">
+        <h3 class="video-card-title"><a href="{{ link }}">{{ video.title }}</a></h3>
+        {% if video.channel and not (hide_channel ?? false) %}<p class="video-card-channel"><a href="{{ path('video_channel', {slug: video.channel.slug}) }}">{{ video.channel.name }}</a></p>{% endif %}
+        <p class="video-card-meta">{{ 'card.views'|trans({count: video.totalViews, n: video.totalViews|video_count}) }}{% if video.publishedAt %} · <time datetime="{{ video.publishedAt|date('c') }}">{{ video.publishedAt|video_ago }}</time>{% endif %}</p>
+    </div>
+</article>

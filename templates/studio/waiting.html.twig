@@ -1,0 +1,9 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.waiting.title'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <p class="video-notice">{{ 'studio.waiting.lead'|trans }}</p>
+    <p><a class="video-button" href="{{ path('video_studio_uploaded', {uploadId: upload_id}) }}">{{ 'studio.waiting.again'|trans }}</a> <a class="video-button" href="{{ path('video_studio') }}">{{ 'studio.nav.videos'|trans }}</a></p>
+</div>
+{% endblock %}

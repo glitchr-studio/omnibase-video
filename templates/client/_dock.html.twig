@@ -1,0 +1,46 @@
+{#
+ # The player, once for the whole visit: in the layout, OUTSIDE #content,
+ # so a page swap never stops it (assets/player.js). Over a page's stage it
+ # is the player; elsewhere, while it plays, the mini-player in a corner.
+ #}
+{% trans_default_domain 'video' %}
+<div id="video-dock" class="video-dock" hidden>
+    <div class="video-dock-bar">
+        <a class="video-dock-title" data-video-dock-title href="#"></a>
+        <button type="button" class="video-dock-button" data-video-dock-toggle aria-label="{{ 'player.toggle'|trans }}"><i class="fa-solid fa-play video-when-paused" aria-hidden="true"></i><i class="fa-solid fa-pause video-when-playing" aria-hidden="true"></i></button>
+        <button type="button" class="video-dock-button" data-video-dock-close aria-label="{{ 'player.close'|trans }}"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <media-controller class="video-player" hotkeys="" defaultsubtitles lang="{{ app.request.locale|slice(0, 2) }}" breakpoints="sm:384 md:576 lg:768">
+        <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
+        <media-settings-menu hidden anchor="auto">
+            <media-settings-menu-item>
+                {{ 'player.speed'|trans }}
+                <media-playback-rate-menu slot="submenu" hidden rates="0.5 0.75 1 1.25 1.5 1.75 2">
+                    <div slot="title">{{ 'player.speed'|trans }}</div>
+                </media-playback-rate-menu>
+            </media-settings-menu-item>
+            <media-settings-menu-item>
+                {{ 'player.quality'|trans }}
+                <media-rendition-menu slot="submenu" hidden>
+                    <div slot="title">{{ 'player.quality'|trans }}</div>
+                </media-rendition-menu>
+            </media-settings-menu-item>
+        </media-settings-menu>
+        <media-control-bar>
+            <media-time-range></media-time-range>
+        </media-control-bar>
+        <media-control-bar class="video-player-buttons">
+            <media-play-button></media-play-button>
+            <media-seek-backward-button seekoffset="10"></media-seek-backward-button>
+            <media-seek-forward-button seekoffset="10"></media-seek-forward-button>
+            <media-mute-button></media-mute-button>
+            <media-volume-range></media-volume-range>
+            <media-time-display showduration></media-time-display>
+            <span class="video-player-spacer"></span>
+            <media-settings-menu-button></media-settings-menu-button>
+            <button type="button" class="video-player-cinema" data-video-cinema aria-label="{{ 'player.cinema'|trans }}" title="{{ 'player.cinema'|trans }}"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+            <media-pip-button></media-pip-button>
+            <media-fullscreen-button></media-fullscreen-button>
+        </media-control-bar>
+    </media-controller>
+</div>

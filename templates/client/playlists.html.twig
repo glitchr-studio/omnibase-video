@@ -1,0 +1,18 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'library.playlists'|trans }}{% endblock %}
+{% block content %}
+<div class="video-library">
+    <header class="video-page-head"><h1>{{ 'library.playlists'|trans }}</h1></header>
+    <div class="video-columns">
+        <div>
+            <p><a class="video-button" href="{{ path('video_later') }}"><i class="fa-regular fa-clock" aria-hidden="true"></i> {{ 'library.later'|trans }}{% if later %} ({{ later.videos|length }}){% endif %}</a></p>
+            {% include '@Video/client/_playlists.html.twig' with {playlists: playlists, empty: 'library.playlists_empty'|trans} %}
+        </div>
+        <section class="video-panel">
+            <h2>{{ 'playlist.new'|trans }}</h2>
+            {{ form_start(form, {attr: {class: 'video-form'}}) }}{{ form_widget(form) }}<button type="submit" class="video-button video-button--accent">{{ 'playlist.create'|trans }}</button>{{ form_end(form) }}
+        </section>
+    </div>
+</div>
+{% endblock %}

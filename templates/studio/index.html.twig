@@ -1,0 +1,57 @@
+{# The studio's first page: the member's films, their state, their figures. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.title'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head">
+        <div>
+            <h1>{{ 'studio.title'|trans }}</h1>
+            {% if channel %}<p class="video-description-meta"><a href="{{ path('video_channel', {slug: channel.slug}) }}">{{ channel.name }}</a> · {{ 'channel.subscribers'|trans({count: channel.subscribers, n: channel.subscribers|video_count}) }}</p>{% endif %}
+        </div>
+        {% if upload %}<a class="video-button video-button--accent" href="{{ path('video_studio_upload') }}"><i class="fa-solid fa-upload" aria-hidden="true"></i> {{ 'studio.nav.upload'|trans }}</a>{% endif %}
+    </header>
+    {% include '@Video/studio/_nav.html.twig' %}
+
+    {% if quota > 0 %}
+    <p class="video-quota"><span class="video-meter" style="--fill: {{ (used / quota * 100)|round(1) }}%"></span> {{ 'studio.quota'|trans({used: (used / 1073741824)|round(1), quota: (quota / 1073741824)|round(0)}) }}</p>
+    {% endif %}
+
+    <nav class="video-tabs">
+        <a href="{{ path('video_studio') }}" {{ not visibility ? 'aria-current="page"' }}>{{ 'studio.filter.all'|trans }}</a>
+        {% for v in ['public', 'unlisted', 'private', 'scheduled'] %}<a href="{{ path('video_studio', {visibilite: v}) }}" {{ visibility == v ? 'aria-current="page"' }}>{{ ('visibility.' ~ v)|trans }}</a>{% endfor %}
+    </nav>
+
+    {% if videos|length %}
+    <table class="video-table">
+        <thead><tr><th>{{ 'studio.col.video'|trans }}</th><th>{{ 'studio.col.visibility'|trans }}</th><th>{{ 'studio.col.date'|trans }}</th><th>{{ 'studio.col.views'|trans }}</th><th>{{ 'studio.col.comments'|trans }}</th><th></th></tr></thead>
+        <tbody>
+        {% for video in videos %}
+            <tr>
+                <td class="video-table-video">
+                    <a class="video-table-poster" href="{{ path('video_studio_edit', {id: video.id}) }}">{% if video.poster %}<img src="{{ video.poster }}" alt="" loading="lazy">{% else %}<span class="video-card-blank"></span>{% endif %}{% if video.duration %}<span class="video-card-time">{{ video.duration|video_time }}</span>{% endif %}</a>
+                    <div>
+                        <a href="{{ path('video_studio_edit', {id: video.id}) }}"><strong>{{ video.title }}</strong></a>
+                        {% if video.processing in ['uploaded', 'running'] %}<small class="video-state is-running">{{ ('processing.' ~ video.processing)|trans }}</small>
+                        {% elseif video.processing == 'failed' %}<small class="video-state is-failed">{{ 'processing.failed'|trans }}</small>{% endif %}
+                        {% if video.takenDown %}<small class="video-state is-failed">{{ 'studio.taken_down'|trans }}</small>{% endif %}
+                    </div>
+                </td>
+                <td>{{ ('visibility.' ~ video.visibility)|trans }}{% if video.visibility == 'scheduled' and video.publishedAt %}<br><small>{{ video.publishedAt|format_datetime('short', 'short') }}</small>{% endif %}</td>
+                <td>{{ (video.publishedAt ?? video.createdAt)|format_date('medium') }}</td>
+                <td>{{ video.views|video_count }}</td>
+                <td>{{ comments[video.id] ?? 0 }}</td>
+                <td class="video-table-tools">
+                    <a href="{{ path('video_studio_stats', {id: video.id}) }}" title="{{ 'studio.nav.stats'|trans }}" aria-label="{{ 'studio.nav.stats'|trans }}"><i class="fa-solid fa-chart-line" aria-hidden="true"></i></a>
+                    <a href="{{ path('video_studio_comments', {id: video.id}) }}" title="{{ 'studio.nav.comments'|trans }}" aria-label="{{ 'studio.nav.comments'|trans }}"><i class="fa-regular fa-comments" aria-hidden="true"></i></a>
+                    <a href="{{ path('video_watch', {slug: video.slug}) }}" title="{{ 'studio.watch'|trans }}" aria-label="{{ 'studio.watch'|trans }}"><i class="fa-solid fa-play" aria-hidden="true"></i></a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="video-empty">{{ 'studio.empty'|trans }}</p>
+    {% endif %}
+</div>
+{% endblock %}

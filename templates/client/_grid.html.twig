@@ -1,0 +1,7 @@
+{# Films in a grid: videos; from; empty (the words when there is none). #}
+{% trans_default_domain 'video' %}
+{% if videos|length %}
+<div class="video-grid">{% for video in videos %}{% include '@Video/client/_card.html.twig' with {video: video, from: from ?? null} only %}{% endfor %}</div>
+{% elseif empty ?? false %}
+<p class="video-empty">{{ empty }}</p>
+{% endif %}

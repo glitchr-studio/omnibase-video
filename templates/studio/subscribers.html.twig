@@ -1,0 +1,14 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.nav.subscribers'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head"><h1>{{ 'studio.nav.subscribers'|trans }}</h1></header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    {% if subscriptions|length %}
+    <ul class="video-rows">
+        {% for subscription in subscriptions %}<li class="video-row"><span>{{ subscription.user }}</span><small class="video-description-meta">{{ subscription.createdAt|video_ago }}</small></li>{% endfor %}
+    </ul>
+    {% else %}<p class="video-empty">{{ 'studio.subscribers_empty'|trans }}</p>{% endif %}
+</div>
+{% endblock %}

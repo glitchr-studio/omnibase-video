@@ -1,0 +1,44 @@
+{#
+ # The stage of a film: where the player (the dock, outside #content) lays
+ # itself. Our films and the remote ones play in <media-controller>; a
+ # platform's film in its own iframe, once the EMBEDS feature is accepted.
+ #   video, resume (seconds, a member's), source (where the visitor came from), autoplay
+ #}
+{% trans_default_domain 'video' %}
+{% set playable = video.playableSource %}
+{% if playable and playable.kind == 'embed' %}
+    {% set frame = embed_url(playable.url) %}
+    <div class="video-stage video-stage--embed" style="aspect-ratio: {{ frame.ratio ?? '16 / 9' }}"
+         {% if frame and frame.src %}data-video-embed="{{ frame.src }}"{% endif %} data-title="{{ video.title }}"
+         data-platform="{{ playable.platform }}" data-external-id="{{ playable.externalId }}">
+        {% if video.poster %}<img class="video-stage-poster" src="{{ video.poster }}" alt="" loading="eager">{% endif %}
+        <div class="video-stage-embed">
+            {% if frame and frame.src %}
+            <button type="button" class="video-button video-button--accent" data-video-embed-play><i class="fa-solid fa-play" aria-hidden="true"></i> {{ 'player.embed.play'|trans({platform: frame.provider|capitalize}) }}</button>
+            <p>{{ 'player.embed.consent'|trans({platform: frame.provider|capitalize}) }} <a href="{{ playable.url }}" rel="noopener" target="_blank">{{ 'player.embed.elsewhere'|trans({platform: frame.provider|capitalize}) }}</a></p>
+            {% else %}
+            <p><a href="{{ playable.url }}" rel="noopener" target="_blank">{{ 'player.embed.elsewhere'|trans({platform: playable.platform ?? ''}) }}</a></p>
+            {% endif %}
+        </div>
+    </div>
+{% elseif playable and video.playable %}
+    {% set src = playable.kind == 'remote-hls' ? path('video_manifest', {slug: video.slug}) : playable.url %}
+    <div class="video-stage" style="aspect-ratio: {{ video.ratio }}"
+         data-video-player
+         data-id="{{ video.id }}" data-slug="{{ video.slug }}" data-title="{{ video.title }}"
+         data-url="{{ path('video_watch', {slug: video.slug}) }}"
+         data-src="{{ src }}" data-type="{{ playable.kind == 'mp4' ? 'mp4' : 'hls' }}"
+         data-poster="{{ video.poster }}" data-storyboard="{{ video.storyboard }}"
+         data-duration="{{ video.duration }}" data-beacon="{{ path('video_beacon', {slug: video.slug}) }}"
+         data-source="{{ source ?? 'direct' }}" data-cinema
+         {% if resume ?? false %}data-resume="{{ resume }}"{% endif %}
+         {% if autoplay ?? false %}data-autoplay{% endif %}>
+        {% if video.poster %}<img class="video-stage-poster" src="{{ video.poster }}" alt="" loading="eager">{% endif %}
+        <noscript><video controls preload="none" poster="{{ video.poster }}" src="{{ src }}"></video></noscript>
+    </div>
+{% else %}
+    <div class="video-stage video-stage--waiting" style="aspect-ratio: {{ video.ratio }}">
+        {% if video.poster %}<img class="video-stage-poster" src="{{ video.poster }}" alt="">{% endif %}
+        <p class="video-stage-message">{{ ('player.' ~ (video.hasFailed ? 'failed' : 'processing'))|trans }}</p>
+    </div>
+{% endif %}

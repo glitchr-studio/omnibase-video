@@ -1,0 +1,40 @@
+{# The search: the bar, the filters, the films found. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+
+{% block title %}{{ q ? 'search.title_for'|trans({q: q}) : 'search.title'|trans }}{% endblock %}
+
+{% block content %}
+<div class="video-search">
+    <form class="video-search-form" method="get" action="{{ path('video_search') }}" role="search">
+        <input class="video-input video-search-input" type="search" name="q" value="{{ q }}" placeholder="{{ 'search.placeholder'|trans }}" aria-label="{{ 'search.title'|trans }}" autofocus>
+        <div class="video-filters">
+            <label>{{ 'search.filter.duration'|trans }}
+                <select name="duree" class="video-input"><option value="">{{ 'search.any'|trans }}</option>{% for d in ['short', 'medium', 'long'] %}<option value="{{ d }}" {{ filters.duration == d ? 'selected' }}>{{ ('search.duration.' ~ d)|trans }}</option>{% endfor %}</select>
+            </label>
+            <label>{{ 'search.filter.date'|trans }}
+                <select name="date" class="video-input"><option value="">{{ 'search.any'|trans }}</option>{% for d in ['day', 'week', 'month', 'year'] %}<option value="{{ d }}" {{ filters.date == d ? 'selected' }}>{{ ('search.date.' ~ d)|trans }}</option>{% endfor %}</select>
+            </label>
+            <label>{{ 'search.filter.category'|trans }}
+                <select name="categorie" class="video-input"><option value="">{{ 'search.any'|trans }}</option>{% for c in categories %}<option value="{{ c }}" {{ filters.category == c ? 'selected' }}>{{ ('category.' ~ c)|trans }}</option>{% endfor %}</select>
+            </label>
+            <label>{{ 'search.filter.sort'|trans }}
+                <select name="tri" class="video-input"><option value="">{{ 'search.sort.relevance'|trans }}</option><option value="date" {{ filters.sort == 'date' ? 'selected' }}>{{ 'search.sort.date'|trans }}</option><option value="views" {{ filters.sort == 'views' ? 'selected' }}>{{ 'search.sort.views'|trans }}</option></select>
+            </label>
+            {% if channel %}<input type="hidden" name="chaine" value="{{ channel.slug }}"><span class="video-badge">{{ channel.name }} <a href="{{ path('video_search', {q: q}) }}" aria-label="{{ 'search.remove_channel'|trans }}">×</a></span>{% endif %}
+            <button type="submit" class="video-button video-button--accent">{{ 'search.submit'|trans }}</button>
+        </div>
+    </form>
+
+    {% if q or filters|filter(v => v)|length %}
+        <p class="video-search-count">{{ 'search.found'|trans({count: found}) }}</p>
+        {% include '@Video/client/_grid.html.twig' with {videos: videos, from: 'search', empty: 'search.none'|trans({q: q})} %}
+        <nav class="video-pager">
+            {% if page > 1 %}<a class="video-button" href="{{ path('video_search', app.request.query.all|merge({page: page - 1})) }}">{{ 'pager.previous'|trans }}</a>{% endif %}
+            {% if videos|length >= per_page %}<a class="video-button" href="{{ path('video_search', app.request.query.all|merge({page: page + 1})) }}">{{ 'pager.next'|trans }}</a>{% endif %}
+        </nav>
+    {% else %}
+        <p class="video-empty">{{ 'search.hint'|trans }}</p>
+    {% endif %}
+</div>
+{% endblock %}

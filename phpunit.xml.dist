@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- bootstrap="tests/bootstrap.php" rather than vendor/autoload.php: installed
+     inside a host application, that application's autoloader never picks up
+     this bundle's autoload-dev, so the bootstrap registers the test namespace
+     itself. The tests are units: no kernel, no database, no ffmpeg, no network. -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="tests/bootstrap.php" cacheDirectory=".phpunit.cache">
+  <testsuites>
+    <testsuite name="unit">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory>src</directory>
+    </include>
+  </source>
+</phpunit>

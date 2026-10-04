@@ -1,0 +1,48 @@
+{# The comments under a film: the form (with the moment the player is at), then the comments, the pinned one first, one level of replies. #}
+{% trans_default_domain 'video' %}
+<section class="video-comments" id="comments">
+    <h2 class="video-section-title">{{ 'comment.title'|trans({count: comment_count}) }}</h2>
+    {% if not video.commentsEnabled %}
+        <p class="video-empty">{{ 'comment.disabled'|trans }}</p>
+    {% elseif form %}
+        {{ form_start(form, {action: path('video_comment', {slug: video.slug}), attr: {class: 'video-comment-form', 'data-video-moment': ''}}) }}
+            {{ form_widget(form) }}
+            <input type="hidden" name="moment" value="">
+            <div class="video-comment-form-foot">
+                <label class="video-check"><input type="checkbox" name="with_moment" value="1" checked> {{ 'comment.with_moment'|trans }}</label>
+                <button type="submit" class="video-button video-button--accent">{{ 'comment.send'|trans }}</button>
+            </div>
+        {{ form_end(form) }}
+    {% else %}
+        <p class="video-empty"><a href="{{ path('security_login') }}">{{ 'comment.login'|trans }}</a></p>
+    {% endif %}
+
+    <ol class="video-comment-list">
+        {% for comment in comments %}
+        <li class="video-comment{{ comment.pinned ? ' is-pinned' }}" id="comment-{{ comment.id }}">
+            {% include '@Video/client/_comment.html.twig' with {comment: comment, video: video} %}
+            {% set replies = comment.visibleReplies %}
+            {% if replies|length %}
+            <ol class="video-comment-replies">
+                {% for reply in replies %}<li class="video-comment" id="comment-{{ reply.id }}">{% include '@Video/client/_comment.html.twig' with {comment: reply, video: video, reply: true} %}</li>{% endfor %}
+            </ol>
+            {% endif %}
+            {% if form and video.commentsEnabled %}
+            <details class="video-reply">
+                <summary>{{ 'comment.reply'|trans }}</summary>
+                <form method="post" action="{{ path('video_comment', {slug: video.slug}) }}" class="video-comment-form">
+                    <textarea class="video-input" name="comment[content]" rows="2" maxlength="4000" required placeholder="{{ 'comment.reply_placeholder'|trans({name: comment.displayName}) }}"></textarea>
+                    <input type="hidden" name="comment[parent]" value="{{ comment.id }}">
+                    <input type="hidden" name="comment[opened]" value="{{ 'now'|date('U') }}">
+                    {% if not app.user %}<input class="video-input" name="comment[name]" required maxlength="120" placeholder="{{ 'comment.name'|trans }}">{% endif %}
+                    <input type="hidden" name="comment[_token]" value="{{ csrf_token('comment') }}">
+                    <button type="submit" class="video-button">{{ 'comment.send'|trans }}</button>
+                </form>
+            </details>
+            {% endif %}
+        </li>
+        {% else %}
+        <li class="video-empty">{{ 'comment.none'|trans }}</li>
+        {% endfor %}
+    </ol>
+</section>

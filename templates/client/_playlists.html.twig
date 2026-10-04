@@ -1,0 +1,20 @@
+{% trans_default_domain 'video' %}
+{% if playlists|length %}
+<div class="video-grid">
+    {% for playlist in playlists %}
+    {% set first = playlist.firstVideo %}
+    <article class="video-card video-card--list">
+        <a class="video-card-poster" href="{{ path('video_playlist', {slug: playlist.slug}) }}">
+            {% if first and first.poster %}<img src="{{ first.poster }}" alt="" loading="lazy">{% else %}<span class="video-card-blank"></span>{% endif %}
+            <span class="video-card-time"><i class="fa-solid fa-list" aria-hidden="true"></i> {{ playlist.videos|length }}</span>
+        </a>
+        <div class="video-card-text">
+            <h3 class="video-card-title"><a href="{{ path('video_playlist', {slug: playlist.slug}) }}">{{ playlist.title }}</a></h3>
+            <p class="video-card-meta">{{ ('visibility.' ~ playlist.visibility)|trans }} · {{ playlist.updatedAt|video_ago }}</p>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% elseif empty ?? false %}
+<p class="video-empty">{{ empty }}</p>
+{% endif %}

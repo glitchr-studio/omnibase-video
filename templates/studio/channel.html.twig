@@ -1,0 +1,16 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.nav.channel'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head"><h1>{{ 'studio.nav.channel'|trans }}</h1><a class="video-button" href="{{ path('video_channel', {slug: channel.slug}) }}">{{ 'studio.channel.see'|trans }}</a></header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    <div class="video-studio-edit">
+        {{ form_start(form, {attr: {class: 'video-form'}}) }}{{ form_widget(form) }}<button type="submit" class="video-button video-button--accent">{{ 'studio.save'|trans }}</button>{{ form_end(form) }}
+        <aside class="video-studio-side">
+            {% if channel.banner %}<img class="video-studio-poster" src="{{ channel.banner }}" alt="">{% endif %}
+            <span class="video-avatar video-avatar--large">{% if channel.avatar %}<img src="{{ channel.avatar }}" alt="">{% else %}<span>{{ channel.initials }}</span>{% endif %}</span>
+        </aside>
+    </div>
+</div>
+{% endblock %}

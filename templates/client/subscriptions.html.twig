@@ -1,0 +1,18 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'library.subscriptions'|trans }}{% endblock %}
+{% block content %}
+<div class="video-library">
+    <header class="video-page-head"><h1>{{ 'library.subscriptions'|trans }}</h1></header>
+    {% if channels|length %}
+    <ul class="video-chips">
+        {% for channel in channels %}
+        <li><a class="video-channel-chip" href="{{ path('video_channel', {slug: channel.slug}) }}"><span class="video-avatar">{% if channel.avatar %}<img src="{{ channel.avatar }}" alt="">{% else %}<span>{{ channel.initials }}</span>{% endif %}</span> {{ channel.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% include '@Video/client/_grid.html.twig' with {videos: videos, from: 'subscriptions', empty: 'library.subscriptions_quiet'|trans} %}
+    {% else %}
+    <p class="video-empty">{{ 'library.subscriptions_empty'|trans }}</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{# A channel: its banner and picture, what it says, its shelves (latest, most seen, lists), its tabs. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+
+{% block title %}{{ channel.name }}{% endblock %}
+{% block description %}{{ channel.description ? channel.description|video_excerpt(160) : 'channel.description'|trans({name: channel.name}) }}{% endblock %}
+
+{% block content %}
+<div class="video-channel">
+    <header class="video-channel-head">
+        <div class="video-channel-banner"{% if channel.banner %} style="background-image: url('{{ channel.banner }}')"{% endif %}></div>
+        <div class="video-channel-id">
+            <span class="video-avatar video-avatar--large">{% if channel.avatar %}<img src="{{ channel.avatar }}" alt="">{% else %}<span>{{ channel.initials }}</span>{% endif %}</span>
+            <div class="video-channel-names">
+                <h1>{{ channel.name }}</h1>
+                <p>@{{ channel.slug }} · {{ 'channel.subscribers'|trans({count: channel.subscribers, n: channel.subscribers|video_count}) }}</p>
+            </div>
+            {% if own %}
+                <a class="video-button" href="{{ path('video_studio_channel') }}"><i class="fa-solid fa-pen" aria-hidden="true"></i> {{ 'channel.edit'|trans }}</a>
+            {% else %}
+            <form method="post" action="{{ path('video_subscribe', {slug: channel.slug}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                <button type="submit" class="video-button{{ subscribed ? '' : ' video-button--accent' }}" aria-pressed="{{ subscribed ? 'true' : 'false' }}">{{ (subscribed ? 'channel.unsubscribe' : 'channel.subscribe')|trans }}</button>
+            </form>
+            {% endif %}
+        </div>
+        <nav class="video-tabs" aria-label="{{ 'channel.tabs'|trans }}">
+            {% for key in ['accueil', 'videos', 'listes', 'a-propos'] %}
+            <a href="{{ path('video_channel', {slug: channel.slug}|merge(key == 'accueil' ? {} : {onglet: key})) }}" {{ tab == key ? 'aria-current="page"' }}>{{ ('channel.tab.' ~ key)|trans }}</a>
+            {% endfor %}
+        </nav>
+    </header>
+
+    {% if tab == 'accueil' %}
+        {% for shelf in channel.shelves %}
+            {% if shelf == 'latest' and latest|length %}
+            <section class="video-shelf"><h2 class="video-section-title">{{ 'channel.shelf.latest'|trans }}</h2>{% include '@Video/client/_grid.html.twig' with {videos: latest, from: 'channel'} %}</section>
+            {% elseif shelf == 'popular' and popular|length %}
+            <section class="video-shelf"><h2 class="video-section-title">{{ 'channel.shelf.popular'|trans }}</h2>{% include '@Video/client/_grid.html.twig' with {videos: popular, from: 'channel'} %}</section>
+            {% elseif shelf == 'playlists' and playlists|length %}
+            <section class="video-shelf"><h2 class="video-section-title">{{ 'channel.shelf.playlists'|trans }}</h2>{% include '@Video/client/_playlists.html.twig' with {playlists: playlists} %}</section>
+            {% endif %}
+        {% endfor %}
+        {% if not latest|length %}<p class="video-empty">{{ 'channel.empty'|trans }}</p>{% endif %}
+    {% elseif tab == 'videos' %}
+        {% include '@Video/client/_grid.html.twig' with {videos: latest, from: 'channel', empty: 'channel.empty'|trans} %}
+        <nav class="video-pager">
+            {% if page > 1 %}<a class="video-button" href="{{ path('video_channel', {slug: channel.slug, onglet: 'videos', page: page - 1}) }}">{{ 'pager.previous'|trans }}</a>{% endif %}
+            {% if latest|length >= 24 %}<a class="video-button" href="{{ path('video_channel', {slug: channel.slug, onglet: 'videos', page: page + 1}) }}">{{ 'pager.next'|trans }}</a>{% endif %}
+        </nav>
+    {% elseif tab == 'listes' %}
+        {% include '@Video/client/_playlists.html.twig' with {playlists: playlists, empty: 'channel.no_playlists'|trans} %}
+    {% else %}
+        <section class="video-about">
+            {% if channel.description %}<div class="video-description-text">{{ channel.description|timecodes }}</div>{% endif %}
+            <p class="video-description-meta">{{ 'channel.since'|trans({date: channel.createdAt|format_date('long')}) }}</p>
+        </section>
+    {% endif %}
+</div>
+{% endblock %}

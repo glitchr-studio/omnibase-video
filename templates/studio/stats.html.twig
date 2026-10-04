@@ -1,0 +1,55 @@
+{# A film's figures: views, average watched, completion, the retention curve, the views of each day, where they came from. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.nav.stats'|trans }} — {{ video.title }}{% endblock %}
+{% block content %}
+{% set max_day = max(stats.days|length ? max(stats.days) : 0, 1) %}
+<div class="video-studio">
+    <header class="video-page-head"><div><p class="video-description-meta"><a href="{{ path('video_studio') }}">{{ 'studio.title'|trans }}</a></p><h1>{{ video.title }}</h1></div></header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    <nav class="video-tabs">
+        <a href="{{ path('video_studio_edit', {id: video.id}) }}">{{ 'studio.nav.details'|trans }}</a>
+        <a href="{{ path('video_studio_stats', {id: video.id}) }}" aria-current="page">{{ 'studio.nav.stats'|trans }}</a>
+        <a href="{{ path('video_studio_comments', {id: video.id}) }}">{{ 'studio.nav.comments'|trans }}</a>
+    </nav>
+
+    <div class="video-figures">
+        <div class="video-figure"><b>{{ stats.views|video_count }}</b><span>{{ 'stats.views'|trans }}</span></div>
+        <div class="video-figure"><b>{{ stats.average|round|video_time }}</b><span>{{ 'stats.average'|trans }}</span></div>
+        <div class="video-figure"><b>{{ (stats.completion * 100)|round }} %</b><span>{{ 'stats.completion'|trans }}</span></div>
+        <div class="video-figure"><b>{{ stats.sittings|video_count }}</b><span>{{ 'stats.sittings'|trans }}</span></div>
+    </div>
+
+    <section class="video-panel">
+        <h2>{{ 'stats.retention'|trans }}</h2>
+        {% if stats.sittings and video.duration %}
+        {% set n = stats.retention|length %}
+        <div class="video-chart-box">
+            <span class="video-chart-label video-chart-label--top">100 %</span>
+            <svg class="video-chart" viewBox="0 0 400 120" preserveAspectRatio="none" role="img" aria-label="{{ 'stats.retention'|trans }}">
+                <polyline class="video-chart-line" fill="none" vector-effect="non-scaling-stroke" points="{% for v in stats.retention %}{{ (loop.index0 / (n - 1) * 400)|round(1) }},{{ (118 - v * 114)|round(1) }} {% endfor %}"/>
+            </svg>
+            <p class="video-chart-axis"><span class="video-chart-label">0:00</span><span class="video-chart-label">{{ video.duration|video_time }}</span></p>
+        </div>
+        <p class="video-description-meta">{{ 'stats.retention_help'|trans }}</p>
+        {% else %}<p class="video-empty">{{ 'stats.none'|trans }}</p>{% endif %}
+    </section>
+
+    <div class="video-columns">
+        <section class="video-panel">
+            <h2>{{ 'stats.days'|trans }}</h2>
+            <div class="video-bars" role="img" aria-label="{{ 'stats.days'|trans }}">
+                {% for day, n in stats.days %}<span class="video-bar" style="--h: {{ (n / max_day * 100)|round }}%" title="{{ day|date('d/m') }} : {{ n }}"></span>{% endfor %}
+            </div>
+        </section>
+        <section class="video-panel">
+            <h2>{{ 'stats.sources'|trans }}</h2>
+            {% if stats.sources|length %}
+            <ul class="video-sources">
+                {% for source, n in stats.sources %}<li><span>{{ ('stats.source.' ~ source)|trans }}</span><span class="video-meter" style="--fill: {{ (n / stats.views * 100)|round }}%"></span><b>{{ n }}</b></li>{% endfor %}
+            </ul>
+            {% else %}<p class="video-empty">{{ 'stats.none'|trans }}</p>{% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

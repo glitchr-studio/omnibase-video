@@ -1,0 +1,26 @@
+{# Taking a film down: the reason its authors are told (the DSA's statement of reasons). #}
+{% extends '@Admin/layout.html.twig' %}
+{% trans_default_domain 'video' %}
+
+{% block page_title %}{{ 'admin.takedown.title'|trans }}{% endblock %}
+
+{% block content_header %}
+<div class="admin-header">
+    <span class="admin-header-icon"><i class="fa-solid fa-ban"></i></span>
+    <div class="admin-header-titles">
+        <h1>{{ 'admin.takedown.title'|trans }}</h1>
+        <div class="admin-header-subtitle">{{ video.title }}</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="post" class="card" style="display:grid;gap:1rem;max-width:44rem;padding:1rem 1.25rem">
+    <input type="hidden" name="_token" value="{{ csrf_token('video-takedown') }}">
+    <p style="margin:0">{{ 'admin.takedown.lead'|trans }}</p>
+    <label style="display:grid;gap:.3rem;font-weight:600">{{ 'admin.takedown.reason'|trans }}
+        <textarea class="form-control" name="reason" rows="5" required placeholder="{{ 'admin.takedown.placeholder'|trans }}"></textarea>
+    </label>
+    <div><button class="btn btn-danger" type="submit"><i class="fa-solid fa-ban"></i> {{ 'admin.takedown.submit'|trans }}</button></div>
+</form>
+{% endblock %}

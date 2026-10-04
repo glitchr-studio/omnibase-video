@@ -1,0 +1,39 @@
+{# A film's comments, for its author: pin one, hide some, close them. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.nav.comments'|trans }} — {{ video.title }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head"><div><p class="video-description-meta"><a href="{{ path('video_studio') }}">{{ 'studio.title'|trans }}</a></p><h1>{{ video.title }}</h1></div>
+        <form method="post">
+            <input type="hidden" name="_token" value="{{ csrf_token('video') }}"><input type="hidden" name="toggle" value="1">
+            <button type="submit" class="video-button">{{ (video.commentsEnabled ? 'studio.comments.close' : 'studio.comments.open')|trans }}</button>
+        </form>
+    </header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    <nav class="video-tabs">
+        <a href="{{ path('video_studio_edit', {id: video.id}) }}">{{ 'studio.nav.details'|trans }}</a>
+        <a href="{{ path('video_studio_stats', {id: video.id}) }}">{{ 'studio.nav.stats'|trans }}</a>
+        <a href="{{ path('video_studio_comments', {id: video.id}) }}" aria-current="page">{{ 'studio.nav.comments'|trans }}</a>
+    </nav>
+    {% if comments|length %}
+    <ol class="video-comment-list">
+        {% for comment in comments %}
+        <li class="video-comment{{ comment.pinned ? ' is-pinned' }}{{ not comment.visible ? ' is-hidden' }}">
+            {% include '@Video/client/_comment.html.twig' with {comment: comment, video: video} %}
+            <p class="video-description-meta">{{ ('comment.state.' ~ comment.state.value)|trans }}{{ comment.parent ? ' · ' ~ 'comment.is_reply'|trans }}</p>
+            <form method="post" class="video-row-tools">
+                <input type="hidden" name="_token" value="{{ csrf_token('video') }}"><input type="hidden" name="comment" value="{{ comment.id }}">
+                {% if comment.visible %}
+                    {% if not comment.parent %}<button type="submit" name="action" value="{{ comment.pinned ? 'unpin' : 'pin' }}" class="video-link-button">{{ (comment.pinned ? 'studio.comments.unpin' : 'studio.comments.pin')|trans }}</button>{% endif %}
+                    <button type="submit" name="action" value="hide" class="video-link-button">{{ 'studio.comments.hide'|trans }}</button>
+                {% else %}
+                    <button type="submit" name="action" value="show" class="video-link-button">{{ 'studio.comments.show'|trans }}</button>
+                {% endif %}
+            </form>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}<p class="video-empty">{{ 'comment.none'|trans }}</p>{% endif %}
+</div>
+{% endblock %}

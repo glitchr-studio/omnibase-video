@@ -1,0 +1,9 @@
+{% trans_default_domain 'video' %}
+<div class="video-comment-head">
+    <strong>{{ comment.displayName }}</strong>
+    {% if comment.author and video.isOwnedBy(comment.author) %}<span class="video-badge">{{ 'comment.author'|trans }}</span>{% endif %}
+    {% if comment.pinned %}<span class="video-badge"><i class="fa-solid fa-thumbtack" aria-hidden="true"></i> {{ 'comment.pinned'|trans }}</span>{% endif %}
+    <small><time datetime="{{ comment.createdAt|date('c') }}">{{ comment.createdAt|video_ago }}</time></small>
+    {% if comment.moment is not null %}<a class="video-timecode video-comment-moment" href="?t={{ comment.moment }}" data-seek="{{ comment.moment }}">{{ comment.momentText }}</a>{% endif %}
+</div>
+<div class="video-comment-text">{{ comment.content|timecodes(video) }}</div>

@@ -1,0 +1,133 @@
+{#
+ # A film's page: the stage (the player lays itself there), its title and
+ # gestures (rate, share at the current second, save, report), its channel,
+ # its description, its comments - and what plays next.
+ #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+
+{% block title %}{{ video.title }}{% endblock %}
+{% block description %}{{ video.content ? video.content|video_excerpt(160) : 'watch.description'|trans({title: video.title}) }}{% endblock %}
+{% block type %}video.other{% endblock %}
+
+{% set rating = video_rating(video) %}
+{% set user = app.user %}
+{% set back = path('video_watch', {slug: video.slug}) %}
+
+{% block content %}
+<div class="video-watch">
+    <div class="video-watch-stage">
+        {% include '@Video/client/_player.html.twig' with {video: video, resume: resume, source: source} %}
+    </div>
+
+    <div class="video-watch-main">
+        {% if video.takenDown %}<p class="video-notice video-notice--danger">{{ 'watch.taken_down'|trans }}</p>{% endif %}
+        {% if video.visibility != 'public' %}<p class="video-notice">{{ ('watch.visibility.' ~ video.visibility)|trans }}</p>{% endif %}
+        <h1 class="video-watch-title">{{ video.title }}</h1>
+
+        <div class="video-watch-bar">
+            {% if channel %}
+            <div class="video-channel-chip">
+                <a class="video-avatar" href="{{ path('video_channel', {slug: channel.slug}) }}" aria-hidden="true" tabindex="-1">{% if channel.avatar %}<img src="{{ channel.avatar }}" alt="">{% else %}<span>{{ channel.initials }}</span>{% endif %}</a>
+                <div>
+                    <a class="video-channel-chip-name" href="{{ path('video_channel', {slug: channel.slug}) }}">{{ channel.name }}</a>
+                    <small>{{ 'channel.subscribers'|trans({count: channel.subscribers, n: channel.subscribers|video_count}) }}</small>
+                </div>
+                {% if not user or not channel.isOwnedBy(user) %}
+                <form method="post" action="{{ path('video_subscribe', {slug: channel.slug}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                    <input type="hidden" name="back" value="{{ back }}">
+                    <button type="submit" class="video-button{{ subscribed ? '' : ' video-button--accent' }}" aria-pressed="{{ subscribed ? 'true' : 'false' }}">{{ (subscribed ? 'channel.unsubscribe' : 'channel.subscribe')|trans }}</button>
+                </form>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="video-actions">
+                <div class="video-rating" role="group" aria-label="{{ 'watch.rating'|trans }}">
+                    {% for choice in ['up', 'down'] %}
+                    <form method="post" action="{{ path('video_rate', {slug: video.slug}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                        <input type="hidden" name="rating" value="{{ choice }}">
+                        <button type="submit" class="video-button video-rating-{{ choice }}" aria-pressed="{{ rating.mine == choice ? 'true' : 'false' }}" title="{{ ('watch.' ~ choice)|trans }}" {{ user ? '' : 'disabled' }}>
+                            <i class="fa-{{ rating.mine == choice ? 'solid' : 'regular' }} fa-thumbs-{{ choice }}" aria-hidden="true"></i>
+                            <span>{% if choice == 'up' %}{{ rating.up|video_count }}{% else %}<span class="visually-hidden">{{ 'watch.down'|trans }}</span>{% endif %}</span>
+                        </button>
+                    </form>
+                    {% endfor %}
+                </div>
+
+                <details class="video-menu" data-video-share-box>
+                    <summary class="video-button"><i class="fa-solid fa-share" aria-hidden="true"></i> {{ 'watch.share'|trans }}</summary>
+                    <div class="video-menu-panel">
+                        <input class="video-input" readonly value="{{ url('video_watch', {slug: video.slug}) }}" onclick="this.select()">
+                        <label class="video-check"><input type="checkbox" name="at_time" checked> {{ 'watch.share_at_time'|trans }}</label>
+                        <button type="button" class="video-button video-button--accent" data-video-share="{{ url('video_watch', {slug: video.slug}) }}">{{ 'watch.copy'|trans }}<span class="video-copied">{{ 'watch.copied'|trans }}</span></button>
+                    </div>
+                </details>
+
+                {% if user %}
+                <details class="video-menu">
+                    <summary class="video-button"><i class="fa-regular fa-bookmark" aria-hidden="true"></i> {{ 'watch.save'|trans }}</summary>
+                    <div class="video-menu-panel">
+                        {% for list in [{slug: 'later', title: 'library.later'|trans, in: later and later.has(video)}]|merge(playlists|map(p => {slug: p.slug, title: p.title, in: p.has(video)})) %}
+                        <form method="post" action="{{ path('video_playlist_toggle') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                            <input type="hidden" name="video" value="{{ video.slug }}">
+                            <input type="hidden" name="playlist" value="{{ list.slug }}">
+                            <input type="hidden" name="back" value="{{ back }}">
+                            <button type="submit" class="video-menu-item" aria-pressed="{{ list.in ? 'true' : 'false' }}"><i class="fa-{{ list.in ? 'solid fa-square-check' : 'regular fa-square' }}" aria-hidden="true"></i> {{ list.title }}</button>
+                        </form>
+                        {% endfor %}
+                        <a class="video-menu-item" href="{{ path('video_playlists', {ajouter: video.slug}) }}"><i class="fa-solid fa-plus" aria-hidden="true"></i> {{ 'playlist.new'|trans }}</a>
+                    </div>
+                </details>
+                {% endif %}
+
+                <details class="video-menu video-menu--end">
+                    <summary class="video-button" aria-label="{{ 'watch.report'|trans }}" title="{{ 'watch.report'|trans }}"><i class="fa-regular fa-flag" aria-hidden="true"></i></summary>
+                    <form class="video-menu-panel video-report" method="post" action="{{ path('video_report', {slug: video.slug}) }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                        <p><strong>{{ 'report.title'|trans }}</strong></p>
+                        {% for reason in reasons %}<label class="video-check"><input type="radio" name="reason" value="{{ reason }}" {{ loop.first ? 'required' }}> {{ ('report.reason.' ~ reason)|trans }}</label>{% endfor %}
+                        <textarea class="video-input" name="text" rows="3" maxlength="2000" placeholder="{{ 'report.text'|trans }}"></textarea>
+                        <button type="submit" class="video-button video-button--accent">{{ 'report.send'|trans }}</button>
+                    </form>
+                </details>
+            </div>
+        </div>
+
+        <div class="video-description">
+            <p class="video-description-meta">
+                {{ 'card.views'|trans({count: video.totalViews, n: video.totalViews|video_count}) }}
+                {% if video.publishedAt %} · <time datetime="{{ video.publishedAt|date('c') }}">{{ video.publishedAt|format_date('long') }}</time>{% endif %}
+                {% if video.category %} · {{ ('category.' ~ video.category)|trans }}{% endif %}
+                {% if video.license != 'standard' %} · {{ ('license.' ~ video.license)|trans }}{% endif %}
+            </p>
+            {% if video.content %}<div class="video-description-text">{{ video.content|timecodes(video) }}</div>{% endif %}
+            {% if video.searchTags|length %}<p class="video-tags">{% for tag in video.searchTags %}<a href="{{ path('video_search', {q: tag}) }}">#{{ tag }}</a> {% endfor %}</p>{% endif %}
+            {% block video_extra %}{% endblock %}
+        </div>
+
+        {% include '@Video/client/_comments.html.twig' %}
+    </div>
+
+    <aside class="video-watch-aside">
+        {% if list %}
+        <section class="video-panel video-list-panel">
+            <h2><a href="{{ path('video_playlist', {slug: list.slug}) }}">{{ list.title }}</a></h2>
+            <ol>
+                {% for item in list.videos %}
+                <li{{ item.id == video.id ? ' aria-current="true"' }}><a href="{{ path('video_watch', {slug: item.slug, list: list.slug}) }}">{{ item.title }}</a></li>
+                {% endfor %}
+            </ol>
+            {% if list_next %}<p><a class="video-button" href="{{ path('video_watch', {slug: list_next.slug, list: list.slug}) }}">{{ 'playlist.next'|trans }} <i class="fa-solid fa-forward-step" aria-hidden="true"></i></a></p>{% endif %}
+        </section>
+        {% endif %}
+        <section class="video-next">
+            <h2 class="video-section-title">{{ 'watch.next'|trans }}</h2>
+            {% for item in next %}{% include '@Video/client/_card.html.twig' with {video: item, compact: true, from: 'suggest'} only %}{% else %}<p class="video-empty">{{ 'watch.next_none'|trans }}</p>{% endfor %}
+        </section>
+    </aside>
+</div>
+{% endblock %}

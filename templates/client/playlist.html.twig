@@ -1,0 +1,52 @@
+{# A list (or "plus tard"): its films in order, played one after the other. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ later ? 'library.later'|trans : playlist.title }}{% endblock %}
+{% block content %}
+{% set own = playlist and app.user and playlist.isOwnedBy(app.user) %}
+<div class="video-library">
+    <header class="video-page-head">
+        <div>
+            <h1>{{ later ? 'library.later'|trans : playlist.title }}</h1>
+            {% if playlist %}<p class="video-description-meta">{{ 'playlist.count'|trans({count: playlist.videos|length}) }}{% if not later %} · {{ ('visibility.' ~ playlist.visibility)|trans }} · {{ playlist.owner }}{% endif %}</p>{% endif %}
+            {% if playlist and playlist.description %}<p>{{ playlist.description }}</p>{% endif %}
+        </div>
+        {% if playlist and playlist.firstVideo %}<a class="video-button video-button--accent" href="{{ path('video_watch', {slug: playlist.firstVideo.slug}|merge(later ? {} : {list: playlist.slug})) }}"><i class="fa-solid fa-play" aria-hidden="true"></i> {{ 'playlist.play'|trans }}</a>{% endif %}
+    </header>
+    {% if playlist and playlist.videos|length %}
+    <ol class="video-rows">
+        {% for video in playlist.videos %}
+        <li class="video-row">
+            {% include '@Video/client/_card.html.twig' with {video: video, compact: true, from: 'playlist', list: later ? null : playlist.slug} only %}
+            {% if own %}
+            <div class="video-row-tools">
+                {% for direction in ['up', 'down'] %}
+                <form method="post" action="{{ path('video_playlist_order', {slug: playlist.slug}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('video') }}"><input type="hidden" name="move" value="{{ video.id }}"><input type="hidden" name="direction" value="{{ direction }}">
+                    <button type="submit" class="video-link-button" aria-label="{{ ('playlist.move_' ~ direction)|trans }}"><i class="fa-solid fa-arrow-{{ direction }}" aria-hidden="true"></i></button>
+                </form>
+                {% endfor %}
+                <form method="post" action="{{ path('video_playlist_toggle') }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('video') }}"><input type="hidden" name="video" value="{{ video.slug }}"><input type="hidden" name="playlist" value="{{ later ? 'later' : playlist.slug }}"><input type="hidden" name="back" value="{{ app.request.pathInfo }}">
+                    <button type="submit" class="video-link-button">{{ 'playlist.remove'|trans }}</button>
+                </form>
+            </div>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="video-empty">{{ (later ? 'library.later_empty' : 'playlist.empty')|trans }}</p>
+    {% endif %}
+    {% if form %}
+    <details class="video-panel">
+        <summary>{{ 'playlist.edit'|trans }}</summary>
+        {{ form_start(form, {attr: {class: 'video-form'}}) }}{{ form_widget(form) }}<button type="submit" class="video-button video-button--accent">{{ 'studio.save'|trans }}</button>{{ form_end(form) }}
+        <form method="post" action="{{ path('video_playlist_delete', {slug: playlist.slug}) }}" onsubmit="return confirm('{{ 'playlist.delete_confirm'|trans|e('js') }}')">
+            <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+            <button type="submit" class="video-link-button video-link-button--danger">{{ 'playlist.delete'|trans }}</button>
+        </form>
+    </details>
+    {% endif %}
+</div>
+{% endblock %}

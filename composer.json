@@ -1,0 +1,54 @@
+{
+    "name": "omnibase/video",
+    "description": "A video platform on omnibase: videos and channels, resumable uploads through tusd, HLS transcoding with ffmpeg, a player that keeps playing across pages, views, likes, timed comments, playlists, subscriptions, reports, a members' studio, local suggestions (Gorse optional) and a Typesense index.",
+    "type": "symfony-bundle",
+    "license": "LGPL-3.0-or-later",
+    "homepage": "https://github.com/glitchr-studio/omnibase-video",
+    "authors": [
+        {
+            "name": "Marco Meyer",
+            "email": "marco.meyer@glitchr.io"
+        }
+    ],
+    "support": {
+        "source": "https://github.com/glitchr-studio/omnibase-video",
+        "issues": "https://github.com/glitchr-studio/omnibase-video/issues"
+    },
+    "require": {
+        "php": "^8.2",
+        "doctrine/orm": "^2.15|^3.0",
+        "glitchr/omnibase": "3.0.*-dev",
+        "glitchr/typesense-bundle": "2.0.*-dev",
+        "omnibase/admin": "dev-main",
+        "symfony/config": "^7.0|^8.0",
+        "symfony/dependency-injection": "^7.0|^8.0",
+        "symfony/form": "^7.0|^8.0",
+        "symfony/http-client": "^7.0|^8.0",
+        "symfony/http-kernel": "^7.0|^8.0",
+        "symfony/messenger": "^7.0|^8.0",
+        "symfony/process": "^7.0|^8.0",
+        "symfony/rate-limiter": "^7.0|^8.0",
+        "symfony/security-bundle": "^7.0|^8.0",
+        "symfony/twig-bundle": "^7.0|^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0|^12.0"
+    },
+    "suggest": {
+        "ffmpeg": "The ffmpeg and ffprobe binaries on the worker transcode the uploads (HLS fMP4, poster, storyboard).",
+        "tusproject/tusd": "The resumable upload server the studio sends files to (docs/upload.md).",
+        "gorse-io/gorse": "gorse-in-one, an optional recommender (video.suggest.provider: gorse); the local suggestions stay when it is down."
+    },
+    "autoload": {
+        "psr-4": {
+            "Base\\Video\\": "./src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Base\\Video\\Tests\\": "./tests"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

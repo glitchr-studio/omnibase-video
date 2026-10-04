@@ -1,0 +1,20 @@
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ 'studio.nav.trash'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head"><h1>{{ 'studio.nav.trash'|trans }}</h1></header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    <p class="video-lead">{{ 'studio.trash.lead'|trans }}</p>
+    {% if items|length %}
+    <ul class="video-rows">
+        {% for item in items %}
+        <li class="video-row">
+            <span><strong>{{ item.video.title }}</strong> <small class="video-description-meta">{{ item.ball.createdAt ? item.ball.createdAt|video_ago }}{% if item.ball.permanentAfter %} · {{ 'studio.trash.until'|trans({date: item.ball.permanentAfter|format_date('long')}) }}{% endif %}</small></span>
+            <form method="post"><input type="hidden" name="_token" value="{{ csrf_token('video') }}"><input type="hidden" name="ball" value="{{ item.ball.id }}"><button type="submit" class="video-button">{{ 'studio.trash.restore'|trans }}</button></form>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}<p class="video-empty">{{ 'studio.trash.empty'|trans }}</p>{% endif %}
+</div>
+{% endblock %}

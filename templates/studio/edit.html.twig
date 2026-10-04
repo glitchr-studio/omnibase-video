@@ -1,0 +1,82 @@
+{# One film in the studio: its details, who sees it and when, its poster; its processing while it is transcoded. #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ video.title }} — {{ 'studio.title'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head">
+        <div>
+            <p class="video-description-meta"><a href="{{ path('video_studio') }}">{{ 'studio.title'|trans }}</a></p>
+            <h1>{{ video.title }}</h1>
+        </div>
+        <a class="video-button" href="{{ path('video_watch', {slug: video.slug}) }}"><i class="fa-solid fa-play" aria-hidden="true"></i> {{ 'studio.watch'|trans }}</a>
+    </header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    <nav class="video-tabs">
+        <a href="{{ path('video_studio_edit', {id: video.id}) }}" aria-current="page">{{ 'studio.nav.details'|trans }}</a>
+        <a href="{{ path('video_studio_stats', {id: video.id}) }}">{{ 'studio.nav.stats'|trans }}</a>
+        <a href="{{ path('video_studio_comments', {id: video.id}) }}">{{ 'studio.nav.comments'|trans }}</a>
+    </nav>
+
+    {% if video.takenDown %}
+    <div class="video-notice video-notice--danger"><strong>{{ 'studio.taken_down'|trans }}</strong><br>{{ video.takedownReason }}</div>
+    {% endif %}
+    {% if video.processing in ['uploaded', 'running'] %}
+    <p class="video-notice video-processing" data-video-processing="{{ path('video_studio_status', {id: video.id}) }}" data-reload>
+        <span class="video-spinner" aria-hidden="true"></span> <span data-video-processing-label>{{ ('processing.' ~ video.processing)|trans }}</span> — {{ 'studio.processing_lead'|trans }}
+    </p>
+    {% elseif video.processing == 'failed' %}
+    <p class="video-notice video-notice--danger">{{ 'processing.failed'|trans }} : {{ video.failure }}</p>
+    {% endif %}
+
+    <div class="video-studio-edit">
+        {{ form_start(form, {attr: {class: 'video-form'}}) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.title) }}
+            {{ form_row(form.description) }}
+            <fieldset class="video-fieldset" data-video-visibility="#{{ form.publishAt.vars.id }}">
+                <legend>{{ 'studio.field.visibility'|trans }}</legend>
+                {% for choice in form.visibility %}<div class="video-choice">{{ form_widget(choice) }} {{ form_label(choice) }}<small>{{ ('visibility.' ~ choice.vars.value ~ '_help')|trans }}</small></div>{% endfor %}
+                <div class="video-field">{{ form_row(form.publishAt) }}</div>
+            </fieldset>
+            <div class="video-form-columns">
+                {{ form_row(form.category) }}
+                {{ form_row(form.language) }}
+                {{ form_row(form.license) }}
+            </div>
+            {{ form_row(form.tags) }}
+            {{ form_row(form.commentsEnabled) }}
+
+            <fieldset class="video-fieldset">
+                <legend>{{ 'studio.field.poster'|trans }}</legend>
+                {% if frames|length %}
+                <div class="video-frames">
+                    {% for frame in frames %}
+                    <button type="button" class="video-frame" data-video-poster-choice="{{ frame }}" data-field="{{ form.poster.vars.id }}" aria-pressed="{{ video.poster == frame ? 'true' : 'false' }}"><img src="{{ frame }}" alt="{{ 'studio.field.frame'|trans({n: loop.index}) }}"></button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {{ form_widget(form.poster) }}
+                {{ form_row(form.posterFile) }}
+            </fieldset>
+            <button type="submit" class="video-button video-button--accent">{{ 'studio.save'|trans }}</button>
+        {{ form_end(form) }}
+
+        <aside class="video-studio-side">
+            {% if video.poster %}<img class="video-studio-poster" src="{{ video.poster }}" alt="">{% endif %}
+            <dl class="video-facts">
+                <dt>{{ 'studio.fact.address'|trans }}</dt><dd><a href="{{ path('video_watch', {slug: video.slug}) }}">{{ url('video_watch', {slug: video.slug}) }}</a></dd>
+                {% if video.duration %}<dt>{{ 'studio.fact.duration'|trans }}</dt><dd>{{ video.duration|video_time }}</dd>{% endif %}
+                {% if video.height %}<dt>{{ 'studio.fact.size'|trans }}</dt><dd>{{ video.width }} × {{ video.height }} ({{ video.renditions|map(r => r.label)|join(', ') }})</dd>{% endif %}
+                {% if video.originalName %}<dt>{{ 'studio.fact.file'|trans }}</dt><dd>{{ video.originalName }}</dd>{% endif %}
+                {% if video.externalUrl %}<dt>{{ 'studio.fact.external'|trans }}</dt><dd><a href="{{ video.externalUrl }}" rel="noopener" target="_blank">{{ video.externalUrl }}</a></dd>{% endif %}
+            </dl>
+            {% if not video.embedded and not video.remote %}<p><a class="video-button" href="{{ path('video_studio_replace', {id: video.id}) }}"><i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i> {{ 'studio.replace.title'|trans }}</a></p>{% endif %}
+            <form method="post" action="{{ path('video_studio_delete', {id: video.id}) }}" onsubmit="return confirm('{{ 'studio.delete_confirm'|trans|e('js') }}')">
+                <input type="hidden" name="_token" value="{{ csrf_token('video') }}">
+                <button type="submit" class="video-link-button video-link-button--danger"><i class="fa-regular fa-trash-can" aria-hidden="true"></i> {{ 'studio.delete'|trans }}</button>
+            </form>
+        </aside>
+    </div>
+</div>
+{% endblock %}

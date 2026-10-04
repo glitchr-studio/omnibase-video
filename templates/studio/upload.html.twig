@@ -1,0 +1,25 @@
+{# Sending films (or replacing one's file): Uppy, resumable, to tusd (assets/studio.js). #}
+{% extends 'layout1.html.twig' %}
+{% trans_default_domain 'video' %}
+{% block title %}{{ replace ? 'studio.replace.title'|trans : 'studio.upload.title'|trans }}{% endblock %}
+{% block content %}
+<div class="video-studio">
+    <header class="video-page-head"><h1>{{ replace ? 'studio.replace.title'|trans : 'studio.upload.title'|trans }}</h1></header>
+    {% include '@Video/studio/_nav.html.twig' %}
+    {% if replace %}<p class="video-notice">{{ 'studio.replace.lead'|trans({title: replace.title}) }}</p>{% endif %}
+    {% if refusal %}
+        <p class="video-notice video-notice--danger">{{ refusal|trans }}</p>
+    {% else %}
+        <p class="video-lead">{{ 'studio.upload.lead'|trans }}</p>
+        <div class="video-uploader" data-video-uploader data-endpoint="{{ endpoint }}" data-token="{{ token }}" data-max-size="{{ max_size }}"
+             data-locale="{{ app.request.locale|slice(0, 2) }}" data-done="{{ path('video_studio_uploaded', {uploadId: '__ID__'}) }}"
+             data-note="{{ 'studio.upload.note'|trans({size: (max_size / 1073741824)|round(0), left: remaining is null ? '∞' : (remaining / 1073741824)|round(1)}) }}"
+             {% if replace %}data-replace="{{ replace.id }}" data-redirect{% endif %}>
+            <noscript>{{ 'studio.upload.noscript'|trans }}</noscript>
+            <p class="video-upload-error" data-video-upload-error></p>
+        </div>
+        <ul class="video-uploaded" data-video-uploaded></ul>
+        <p class="video-description-meta">{{ 'studio.upload.resume'|trans }}</p>
+    {% endif %}
+</div>
+{% endblock %}
