@@ -2,9 +2,14 @@
  # The player, once for the whole visit: in the layout, OUTSIDE #content,
  # so a page swap never stops it (assets/player.js). Over a page's stage it
  # is the player; elsewhere, while it plays, the mini-player in a corner.
+ #
+ # One thing sounds at a time: glitchr/omnibase's media.js (window.MediaPlay),
+ # which the player joins and announces itself to. data-media-play="off": the
+ # dock's own <video> is announced by the player, not as a plain element.
  #}
 {% trans_default_domain 'video' %}
-<div id="video-dock" class="video-dock" hidden>
+<script src="{{ asset('bundles/base/js/media.js') }}" defer></script>
+<div id="video-dock" class="video-dock" data-media-play="off" hidden>
     <div class="video-dock-bar">
         <a class="video-dock-title" data-video-dock-title href="#"></a>
         <button type="button" class="video-dock-button" data-video-dock-toggle aria-label="{{ 'player.toggle'|trans }}"><i class="fa-solid fa-play video-when-paused" aria-hidden="true"></i><i class="fa-solid fa-pause video-when-playing" aria-hidden="true"></i></button>

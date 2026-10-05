@@ -18,8 +18,9 @@ sources" below).
   storyboard sprite + WebVTT.
 - **One player for the whole visit** (`media-chrome` + `hls-video-element`),
   outside `#content`: a transparent.js navigation never stops it; it shrinks
-  to a corner and comes back to its page. Engines (`registerEngine`) and the
-  `media:play` event let other sources and other players live with it.
+  to a corner and comes back to its page. Engines (`registerEngine`) and
+  glitchr/omnibase's `media:play` (`MediaPlay`) let other sources and other
+  players live with it.
 - **Views** counted from the player's beacons (30 s or half the film, once a
   visitor every six hours), flushed by cron; **likes** on omnibase's `Like`;
   **comments** on omnibase's `Comment` + the moment of the film;

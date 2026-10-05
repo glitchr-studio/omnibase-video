@@ -46,12 +46,16 @@
  * type, platform, externalId, poster, duration...). omnibase/video keeps a
  * source's reference (platform + id), never its logic.
  *
- * ONE THING AT A TIME. When it starts playing, the player dispatches
- * `media:play` on document ({detail: {source: 'video', id, element}}); when
- * anything else on the page does (omnibase/music's bar, another player), it
- * pauses.
+ * ONE THING AT A TIME, through glitchr/omnibase's `media:play`
+ * (window.MediaPlay: bundles/base/js/media.js, which the dock links). The
+ * player joins it - it is paused when anything else on the page starts
+ * sounding (an audio bar, another player, a plain <audio> or <video>) - and
+ * announces itself when it starts ({player: VideoPlayer, kind: 'video', id,
+ * source: 'video', element}). The dock carries data-media-play="off": its own
+ * <video> is the player's to announce, not a plain element of the page.
  */
 var dock, controller, stage, current = null, beacon = null, layoutTimer = null, resizeObserver = null;
+var leaveMediaPlay = null;
 var started = false;
 var engines = {}, engine = null;
 
@@ -218,7 +222,7 @@ function listen(e, b, film) {
         clearInterval(b.timer);
         b.timer = setInterval(function () { if (live()) send('progress'); else clearInterval(b.timer); }, 10000);
         // One thing at a time on the page: the others hear it and pause.
-        document.dispatchEvent(new CustomEvent('media:play', { detail: { source: 'video', id: film.id, element: e.element ? e.element() : null } }));
+        if (joinMediaPlay()) window.MediaPlay.announce(VideoPlayer, { kind: 'video', id: film.id, source: 'video', element: e.element ? e.element() : null });
         place();
     });
     e.on('time', function () {
@@ -242,11 +246,16 @@ function listen(e, b, film) {
     });
 }
 
-/** Something else started playing on the page: this player gives way. */
-function yieldTo(event) {
-    var detail = event.detail || {};
-    if (detail.source === 'video' && current && String(detail.id) === String(current.id)) return;
-    if (engine && !engine.paused()) engine.pause();
+/**
+ * One thing sounds at a time: the player takes part in omnibase's media:play
+ * (MediaPlay.join). Something else starts on the page: this player gives way.
+ * False while the page has no MediaPlay (media.js not loaded yet, or at all).
+ */
+function joinMediaPlay() {
+    if (leaveMediaPlay) return true;
+    if (!window.MediaPlay) return false;
+    leaveMediaPlay = window.MediaPlay.join(VideoPlayer, function () { if (engine && !engine.paused()) engine.pause(); });
+    return true;
 }
 
 function payload(event) {
@@ -370,7 +379,8 @@ var VideoPlayer = {
         controller = dock.querySelector('media-controller');
         document.addEventListener('click', clicks);
         document.addEventListener('submit', submits, true);
-        document.addEventListener('media:play', yieldTo);
+        // media.js may be a deferred script further down the page (the dock links it): joined now, or once the page is read.
+        if (!joinMediaPlay()) document.addEventListener('DOMContentLoaded', joinMediaPlay, { once: true });
         window.addEventListener('resize', place);
         window.addEventListener('transparent:load', scan);
         window.addEventListener('pagehide', function () { flushBeacon('progress'); });

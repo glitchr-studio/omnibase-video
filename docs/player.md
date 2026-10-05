@@ -56,14 +56,25 @@ and the timecodes work with any engine that gives the time.
 
 ## One thing at a time: `media:play`
 
-When it starts, the player dispatches on `document`:
+The player takes part in glitchr/omnibase's `media:play` contract through its
+module (`window.MediaPlay`, `bundles/base/js/media.js` - the dock links it; a
+site may also bundle it, `import '../vendor/glitchr/omnibase/assets/media/media.js'`):
+
+- it **joins** (`MediaPlay.join(VideoPlayer, pause)`): when anything else on
+  the page starts sounding - omnibase/music's bar, another player, a plain
+  `<audio>` or `<video>` - it pauses;
+- it **announces** itself when it starts
+  (`MediaPlay.announce(VideoPlayer, {kind: 'video', id, source: 'video', element})`),
+  which dispatches on `document`:
 
 ```js
-new CustomEvent('media:play', { detail: { source: 'video', id, element } })
+new CustomEvent('media:play', { detail: { player: VideoPlayer, kind: 'video', id, source: 'video', element } })
 ```
 
-and it pauses when anything else on the page dispatches one (another
-player, an audio bar).
+The dock carries `data-media-play="off"`: its `<video>` is the player's to
+announce, not a plain element of the page. Another script takes part the same
+way (omnibase's `docs/40-commons/front-end.md`); the player has no pause logic
+of its own any more.
 
 ## Remote HLS, without a copy
 
