@@ -5,7 +5,8 @@ namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 /*
  * Everything in src/ is a plain autowired service, the way an application's
  * own src/ is. The back office's screens and tiles are loaded only when
- * omnibase/admin is installed.
+ * omnibase/admin is installed, the demonstration accounts (src/Demo) only
+ * with a glitchr/omnibase that has the demo environment.
  */
 return function (ContainerConfigurator $configurator) {
     $src = dirname(__DIR__).'/src';
@@ -27,6 +28,7 @@ return function (ContainerConfigurator $configurator) {
             $src.'/Search/SafeIndexer.php',
             $src.'/Controller/Admin/',
             $src.'/Admin/',
+            $src.'/Demo/',
             $src.'/VideoBundle.php',
         ]);
 
@@ -47,5 +49,10 @@ return function (ContainerConfigurator $configurator) {
         $services->load('Base\\Video\\Controller\\Admin\\', $src.'/Controller/Admin/')
             ->tag('controller.service_arguments');
         $services->load('Base\\Video\\Admin\\', $src.'/Admin/');
+    }
+
+    // The demonstration accounts of a video platform, when the installed glitchr/omnibase has the demo environment.
+    if (interface_exists('Base\\Demo\\DemoAccountProviderInterface')) {
+        $services->load('Base\\Video\\Demo\\', $src.'/Demo/');
     }
 };

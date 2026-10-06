@@ -44,3 +44,36 @@ MenuItem::linkToCrud(\Base\Entity\User\Complaint::class, 'Signalements', 'fa-sol
 The films and channels are written by `ROLE_ADMIN`; taking down, restoring
 and the comments by `ROLE_EDITOR`. The tile: comments waiting, reports
 open, conversions running or failed, views of thirty days.
+
+# Demonstration accounts
+
+In glitchr/omnibase's `demo` environment (its `docs/20-architecture/demo.md`)
+the sign-in page offers one button for each of a platform's people.
+`Base\Video\Demo\VideoDemoAccounts` declares them:
+
+| Identifier | Role | |
+|---|---|---|
+| `createur` | none (`ROLE_USER`) | a channel and its films: the studio, uploading, the statistics, the comments received |
+| `membre` | none (`ROLE_USER`) | watches, likes, comments at a film's moment, subscribes, keeps lists |
+| `moderation` | `ROLE_EDITOR` | the comments to approve, the reports, taking a film down |
+| `admin` | `ROLE_ADMIN` | every film and channel in the back office |
+
+The password is the identifier. A creator and a member hold the same role -
+every member has the studio: the fixtures tell them apart, by taking the
+accounts from omnibase's factory and giving the first a channel and films,
+the second subscriptions and a list:
+
+```php
+public function __construct(private readonly \Base\Demo\DemoAccountFactory $accounts) {}
+
+$createur = $this->accounts->account('createur', $manager);   // created from its declaration, or the database's
+$channel = new Channel('Atelier Mandelbrot', $createur);
+```
+
+Where `ROLE_EDITOR` stands above the super-administrator (omnibase's usual
+hierarchy; here the moderators are below the administrators:
+`ROLE_EDITOR: [ROLE_STAFF]`, `ROLE_ADMIN: [ROLE_EDITOR]`), `moderation` is
+not declared: a super-administrator is never a demonstration account. A
+platform without one of the accounts leaves it out (`base.demo.exclude`).
+The labels are `demo.<identifier>.label` and `.description` in the `video`
+domain (fr, en).

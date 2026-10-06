@@ -426,3 +426,18 @@ admin:
             approved: 'Comment approved.'
             spam: 'Comment marked as spam.'
             trashed: 'Comment hidden.'
+
+# The demonstration accounts (Base\Video\Demo\VideoDemoAccounts): the button, and what the role sees.
+demo:
+    createur:
+        label: 'Creator'
+        description: 'A channel and its films: the studio, uploading, the statistics, the comments received.'
+    membre:
+        label: 'Member'
+        description: 'Watches, likes, comments at a moment of the film, subscribes and keeps films in lists.'
+    moderation:
+        label: 'Moderation'
+        description: 'The comments to approve, the reports, taking a film down with its reason.'
+    admin:
+        label: 'Catalogue'
+        description: 'Every film and every channel in the back office, the site’s pages and texts.'
