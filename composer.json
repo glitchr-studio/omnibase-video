@@ -2,7 +2,7 @@
     "name": "omnibase/video",
     "description": "A video platform on omnibase: videos and channels, resumable uploads through tusd, HLS transcoding with ffmpeg, a player that keeps playing across pages, views, likes, timed comments, playlists, subscriptions, reports, a members' studio, local suggestions (Gorse optional) and a Typesense index.",
     "type": "symfony-bundle",
-    "license": "LGPL-3.0-or-later",
+    "license": "MIT",
     "homepage": "https://github.com/glitchr-studio/omnibase-video",
     "authors": [
         {

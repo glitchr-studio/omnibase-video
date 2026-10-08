@@ -44,4 +44,4 @@ composer require omnibase/video:dev-main
 Documentation: [docs/](docs/index.md). Tests: `vendor/bin/phpunit` (units:
 no kernel, no database, no ffmpeg, no network).
 
-Licence: LGPL-3.0-or-later.
+Licence: MIT since 2026-10-09; earlier versions remain published under LGPL-3.0-or-later.
